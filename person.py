@@ -76,3 +76,27 @@ class Employee(Person):
         rate = self.get_pay_rate()
         total = (self._unpaid_hours * rate) + (self._unpaid_overtime * rate * 1.5)
         return total
+    
+class Manager(Employee):
+    def __init__(self, employees=[], office=None, *args, **kwargs):
+        self._employees = employees
+        self._office = office
+        super().__init__(*args, **kwargs)
+
+    def get_office(self):
+        return self._office
+    
+    def set_office(self, office):
+        self._office = office 
+
+    def get_employees(self):
+        return self._employees[:]
+    
+    def add_employees(self, *args):
+        for emp in args:
+            if type(emp) == Employee:
+                self._employees.append(emp)
+
+    def remove_employee(self, emp):
+        emp_idx = self._employees.index(emp)
+        return self._employees.pop(emp_idx)
