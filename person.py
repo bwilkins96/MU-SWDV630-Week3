@@ -4,7 +4,13 @@
 from datetime import date
 
 class Person:
+    """Person base class for a hotel management system"""
+    
     def __init__(self, name, start, end):
+        """
+        Sets up a Person instance with name, start date, and end date parameters.
+        Parameters start and end should be date objects.
+        """
         self._name = name.title() 
         self._start = start
         self._end = end
@@ -27,11 +33,21 @@ class Person:
     def set_end(self, end): 
         self._end = end
 
+    def is_current(self):
+        """Returns whether the Person instance is currently active"""
+        if self.get_end() == None:
+            return True
+        
+        return date.today() <= self.get_end()
+
     def __repr__(self):
         return '(Person: ' + self.get_name() + ')'
 
 class Guest(Person):
+    """Guest subclass for a hotel management system"""
+
     def __init__(self, room, *args, **kwargs):
+        """Sets up a Guest instance with a room parameter"""
         self._room = room
         self._checked_in = False
         super().__init__(*args, **kwargs)
@@ -46,15 +62,20 @@ class Guest(Person):
         return self._checked_in
     
     def check_in(self):
+        """Sets checked_in to true and automatically updates start"""
         self._checked_in = True
         self.set_start(date.today())
 
     def check_out(self):
+        """Sets checked_in to false and automatically updates end"""
         self._checked_in = False
         self.set_end(date.today())
 
 class Employee(Person):
+    """Employee subclass for a hotel management system"""
+
     def __init__(self, pay_rate,  *args, **kwargs):
+        """Sets up an Employee instance with a pay_rate parameter"""
         self._pay_rate = float(pay_rate)
         self._unpaid_hours = 0.0
         self._unpaid_overtime = 0.0
@@ -68,20 +89,29 @@ class Employee(Person):
         self._pay_rate = float(pay_rate)
 
     def add_hours(self, hours, overtime=0):
+        """
+        Adds hours to unpaid_hours and the optional overtime parameter to unpaid_overtime.
+        The overtime parameter defaults to 0.
+        """
         self._unpaid_hours += hours
         self._unpaid_overtime += overtime
 
     def reset_hours(self):
+        """Sets unpaid_hours and unpaid_overtime to 0"""
         self._unpaid_hours = 0.0
         self._unpaid_overtime = 0.0
 
     def get_total_pay(self):
+        """Returns the total pay owed to the Employee instance"""
         rate = self.get_pay_rate()
         total = (self._unpaid_hours * rate) + (self._unpaid_overtime * rate * 1.5)
         return total
     
 class Manager(Employee):
+    """Manager subclass for a hotel management system"""
+
     def __init__(self, office, *args, **kwargs):
+        """Sets up a Manager instance with an office parameter"""
         self._office = office
         self._employees = []
         super().__init__(*args, **kwargs)
@@ -95,15 +125,17 @@ class Manager(Employee):
     def get_employees(self):
         return self._employees[:]
     
-    def add_employees(self, *args):
-        for emp in args:
-            if type(emp) == Employee:
-                self._employees.append(emp)
+    def add_employee(self, emp):
+        """Adds Employee emp to employees list"""
+        if type(emp) == Employee:
+            self._employees.append(emp)
 
     def remove_employee(self, emp):
+        """Removes Employee emp from employees list"""
         emp_idx = self._employees.index(emp)
         return self._employees.pop(emp_idx)
 
+# Test functions
 def test_guest():
     guest = Guest(150, 'Joe', date(2023, 5, 20), date(2023, 6, 1))
     print(guest.is_checked_in(), guest.get_start())     # False, 2023-05-20
@@ -125,13 +157,16 @@ def test_employee():
     emp.reset_hours()
     print(emp.get_total_pay())          # 0.0
 
+    print(emp.is_current())             # True
+
 def test_manager():
     man = Manager('B10', 30, 'Jenny', date.today(), None)
     print(man.get_employees())          # []
 
     emp_a = Employee(20, 'Julian', date.today(), None)
     emp_b = Employee(20, 'Jennifer', date.today(), None)
-    man.add_employees(emp_a, emp_b)
+    man.add_employee(emp_a)
+    man.add_employee(emp_b)
     print(man.get_employees())          # [(Person: Julian), (Person: Jennifer)]
 
     man.remove_employee(emp_a)
